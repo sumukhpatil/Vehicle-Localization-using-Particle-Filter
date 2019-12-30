@@ -25,7 +25,7 @@ struct Particle {
 };
 
 
-class ParticleFilter {  
+class ParticleFilter {
  public:
   // Constructor
   // @param num_particles Number of particles
@@ -40,7 +40,7 @@ class ParticleFilter {
    * @param x Initial x position [m] (simulated estimate from GPS)
    * @param y Initial y position [m]
    * @param theta Initial orientation [rad]
-   * @param std[] Array of dimension 3 [standard deviation of x [m], 
+   * @param std[] Array of dimension 3 [standard deviation of x [m],
    *   standard deviation of y [m], standard deviation of yaw [rad]]
    */
   void init(double x, double y, double theta, double std[]);
@@ -49,36 +49,36 @@ class ParticleFilter {
    * prediction Predicts the state for the next time step
    *   using the process model.
    * @param delta_t Time between time step t and t+1 in measurements [s]
-   * @param std_pos[] Array of dimension 3 [standard deviation of x [m], 
+   * @param std_pos[] Array of dimension 3 [standard deviation of x [m],
    *   standard deviation of y [m], standard deviation of yaw [rad]]
    * @param velocity Velocity of car from t to t+1 [m/s]
    * @param yaw_rate Yaw rate of car from t to t+1 [rad/s]
    */
-  void prediction(double delta_t, double std_pos[], double velocity, 
+  void prediction(double delta_t, double std_pos[], double velocity,
                   double yaw_rate);
-  
+
   /**
-   * dataAssociation Finds which observations correspond to which landmarks 
+   * dataAssociation Finds which observations correspond to which landmarks
    *   (likely by using a nearest-neighbors data association).
    * @param predicted Vector of predicted landmark observations
    * @param observations Vector of landmark observations
    */
-  void dataAssociation(std::vector<LandmarkObs> predicted, 
+  void dataAssociation(std::vector<LandmarkObs> predicted,
                        std::vector<LandmarkObs>& observations);
-  
+
   /**
    * updateWeights Updates the weights for each particle based on the likelihood
-   *   of the observed measurements. 
+   *   of the observed measurements.
    * @param sensor_range Range [m] of sensor
    * @param std_landmark[] Array of dimension 2
    *   [Landmark measurement uncertainty [x [m], y [m]]]
    * @param observations Vector of landmark observations
    * @param map Map class containing map landmarks
    */
-  void updateWeights(double sensor_range, double std_landmark[], 
+  void updateWeights(double sensor_range, double std_landmark[],
                      const std::vector<LandmarkObs> &observations,
                      const Map &map_landmarks);
-  
+
   /**
    * resample Resamples from the updated set of particles to form
    *   the new set of particles.
@@ -88,11 +88,11 @@ class ParticleFilter {
   /**
    * Set a particles list of associations, along with the associations'
    *   calculated world x,y coordinates
-   * This can be a very useful debugging tool to make sure transformations 
+   * This can be a very useful debugging tool to make sure transformations
    *   are correct and assocations correctly connected
    */
   void SetAssociations(Particle& particle, const std::vector<int>& associations,
-                       const std::vector<double>& sense_x, 
+                       const std::vector<double>& sense_x,
                        const std::vector<double>& sense_y);
 
   /**
@@ -113,13 +113,13 @@ class ParticleFilter {
 
  private:
   // Number of particles to draw
-  int num_particles; 
-  
+  int num_particles;
+
   // Flag, if filter is initialized
   bool is_initialized;
-  
+
   // Vector of weights of all particles
-  std::vector<double> weights; 
+  std::vector<double> weights;
 };
 
 #endif  // PARTICLE_FILTER_H_

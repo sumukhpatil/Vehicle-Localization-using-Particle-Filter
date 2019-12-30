@@ -49,8 +49,8 @@ void ParticleFilter::init(double x, double y, double theta, double std[]) {
     particle.theta = dist_theta(gen);
     particle.weight = 1;
     particles.push_back(particle);
+    weights.push_back(particle.weight);
   }
-
   is_initialized = true;
 }
 
@@ -97,7 +97,21 @@ void ParticleFilter::dataAssociation(vector<LandmarkObs> predicted,
    *   probably find it useful to implement this method and use it as a helper
    *   during the updateWeights phase.
    */
+   for (int i = 0; i < observations.size(); i++) {
+     double minDist = std::numeric_limits<double>::max();
+     int id = -1;
+     for (int j = 0; j < predicted.size(); j++) {
+       double x = observations[i].x - predicted[j].x;
+       double y = observations[i].y - predicted[j].y;
 
+       double dist = x * x + y * y;
+       if (dist < minDist) {
+         minDist = dist;
+         id = predicted[j].id;
+       }
+     }
+     observations[i].id = id;
+   }
 }
 
 void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
@@ -116,7 +130,57 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
    *   and the following is a good resource for the actual equation to implement
    *   (look at equation 3.33) http://planning.cs.uiuc.edu/node99.html
    */
+   double std_x = std_landmark[0];
+   double std_y = std_landmark[1];
+   double obs_x, obs_y = 0;
+   LandmarkObs obs_map;
+   LandmarkObs in_Range;
 
+   std::vector<LandmarkObs> transformed_observations;
+   std::vector<LandmarkObs> inRangeLandmarks;
+   for (int i = 0; i < particles.size(); i++) {
+     double range = sensor_range * sensor_range;
+     for (int j = 0; j < map_landmarks.landmark_list.size(); j++) {
+       in_Range.x = (double) map_landmarks.landmark_list[j].x_f;
+       in_Range.y = (double) map_landmarks.landmark_list[j].y_f;
+       in_Range.id = map_landmarks.landmark_list[j].id_i;
+       if (particles[i].x - in_Range.x * particles[i].x - in_Range.x + particles[i].y - in_Range.y * particles[i].y - in_Range.y <= range) {
+         inRangeLandmarks.push_back(in_Range);
+       }
+     }
+
+     for (int j = 0; j < observations.size(); j++) {
+       obs_x = observations[j].x;
+       obs_y = observations[j].y;
+
+       obs_map.x = cos(particles[i].theta) * obs_x - sin(particles[i].theta) * obs_y + particles[i].x;
+       obs_map.y = sin(particles[i].theta) * obs_x + cos(particles[i].theta) * obs_y + particles[i].y;
+       transformed_observations.push_back(obs_map);
+     }
+     dataAssociation(inRangeLandmarks, transformed_observations);
+     for (int j = 0; j < transformed_observations.size(); j++) {
+       double landmark_x, landmark_y;
+       int k = 0;
+       bool is_found = false;
+       while (!is_found && k < inRangeLandmarks.size()) {
+         if (inRangeLandmarks[k].id == transformed_observations[j].id) {
+           landmark_x = transformed_observations[j].x;
+           landmark_y = transformed_observations[j].y;
+           is_found = true;
+         }
+         k++;
+       }
+       double x_diff = transformed_observations[j].x - landmark_x;
+       double y_diff = transformed_observations[j].y - landmark_y;
+
+       double weight = (1/(2 * M_PI * std_x * std_y)) * exp(- (x_diff * x_diff / (2 * std_x * std_x) + (y_diff * y_diff / (2 * std_y * std_y))));
+       if (weight = 0) {
+         particles[i].weight = particles[i].weight * 0.0001;
+       } else {
+         particles[i].weight = particles[i].weight * weight;
+       }
+     }
+   }
 }
 
 void ParticleFilter::resample() {
