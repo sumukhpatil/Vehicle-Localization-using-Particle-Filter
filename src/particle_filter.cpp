@@ -158,7 +158,6 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
      std::vector<LandmarkObs> inRangeLandmarks;
 
      for (int j = 0; j < map_landmarks.landmark_list.size(); j++) {
-       // Map::single_landmark_s in_Range = map_landmarks.landmark_list[j];
        in_Range.x = (double) map_landmarks.landmark_list[j].x_f;
        in_Range.y = (double) map_landmarks.landmark_list[j].y_f;
        in_Range.id = map_landmarks.landmark_list[j].id_i;
@@ -177,7 +176,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
        transformed_observations.push_back(obs_map);
      }
      dataAssociation(inRangeLandmarks, transformed_observations);
-     // particles[i].weight = 1;
+
      for (int j = 0; j < transformed_observations.size(); j++) {
        double obs_x = transformed_observations[j].x;
        double obs_y = transformed_observations[j].y;
@@ -191,7 +190,6 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
            double x_diff = obs_x - landmark_x;
            double y_diff = obs_y - landmark_y;
            double exponent = (pow(x_diff, 2) / (2 * pow(std_x, 2))) + (pow(y_diff, 2) / (2 * pow(std_y, 2)));
-           // std::cout << "exponent " << k << " = " << exponent << "\n";
            weight = (1 / (2 * M_PI * std_x * std_y)) * exp(-1 * exponent);
            particles[i].weight = particles[i].weight * weight;
          }
@@ -199,7 +197,6 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
      }
      normalize = normalize + particles[i].weight;
    }
-   // std::cout << "observation size = " << transformed_observations.size() << "landmark size = " << inRangeLandmarks.size() << "\n";
    for (int i = 0; i < particles.size(); i++) {
      particles[i].weight = particles[i].weight / normalize;
      weights[i] = particles[i].weight;
@@ -222,22 +219,7 @@ void ParticleFilter::resample() {
    std::default_random_engine gen;
    std::uniform_int_distribution<int> dist(0, num_particles - 1);
    int index = dist(gen);
-   // double wmax = std::numeric_limits<double>::min();
-
-   // for (int i = 0; i < weights.size(); i++) {
-   //   if (weights[i] > wmax) {
-   //     wmax = weights[i];
-   //   }
-   // }
-   // std::cout << "#################################################\n";
-   // std::cout << "weights are: \n";
-   // for (int i = 0; i < weights.size(); i++) {
-   //   std::cout << weights[i] << std::endl;
-   // }
-   // std::cout << "#################################################\n";
    double max_weight = 2 * *std::max_element(weights.begin(), weights.end());
-   // std::cout << "maximum weight = " << wmax << std::endl;
-   std::cout << "maximum weight using function = " << max_weight << std::endl;
 
    for (int i = 0; i < particles.size(); i++) {
      std::uniform_real_distribution<double> dist_weight(0, max_weight);
