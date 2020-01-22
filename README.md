@@ -8,8 +8,8 @@ The initial estimation of the vehicle location is measured using GPS by taking i
 ## Project Build Instructions
 ### Ubuntu
 ```bash
-git clone
-cd Kidnapped-Vehicle
+git clone https://github.com/sumukhpatil/Vehicle-Localization-using-Particle-Filter.git
+cd Vehicle-Localization-using-Particle-Filter
 mkdir build && cd build
 cmake ..
 make
